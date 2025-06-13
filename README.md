@@ -1,0 +1,1 @@
+# amazon-comprehend-text-insights-entity-detection
