@@ -77,7 +77,7 @@ Resources:
     Properties:
       Handler: index.handler
       Role: !GetAtt GitHubToS3Role.Arn
-      Runtime: python3.9
+      Runtime: python3.12
       Timeout: 300  # 5 minutes
       MemorySize: 512  # More memory for processing files
       Code:
