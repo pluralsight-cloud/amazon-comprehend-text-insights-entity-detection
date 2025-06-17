@@ -1,0 +1,353 @@
+Hi, and welcome back to this lesson on Kinesis. 
+-
+
+So, what is Kinesis?
+>
+Well, it's a family of services
+that enables you to collect, process,
+and analyze streaming data in real time.
+
+>
+And it allows you to build custom applications
+for your own business needs,
+and make decisions or take action based on the data that you are streaming.
+
+-
+>
+And when I first came across Kinesis,
+I wondered, "why did they choose that name?"
+Well, Kinesis is originally a Greek word,
+it means movement or motion.
+And it's a really good name for this service,
+because Kinesis deals with data that is in motion, moving from one place to another.
+So in other words, with streaming data
+rather than data that is static, stored on disk, in S3 or in a database.
+
+-
+>
+So Kinesis is all about handling streaming data.
+>
+Which his essentially: data generated continuously
+by thousands of data sources,(or producers)
+That typically send data records simultaneously
+and in small sizes of just a few kilobytes.
+
+>
+For instance, think about a stream of financial transactions.
+>Or could be stock prices,
+>what about in-game data which is created as the player progresses through the game,
+>Or social media feeds,
+>location tracking data - (for example, Uber or Google Maps),
+>IoT sensors (or internet of things, So think about sensors inside a factory,detecting air temperature or air quality),
+>clickstream data,
+>or even application log files.
+So we're talking about a fairly steady stream that consists of lots of small pieces of unstructured data.
+
+
+And Kinesis allows you to collect
+and analyze this type of data in real time,
+so you can make decisions and take actions based on your findings.
+-
+
+
+Now, Kinesis isn't just one service.
+It's actually a few different services,
+But the one thing that they have in common
+is that they are all dealing with streaming data.
+>
+So first of all, we've got Kinesis Streams,
+and this enables you to stream data or video
+to allow you to build custom applications
+which process the data in real time.
+>
+With Kinesis Streams, There are 2 different options available.
+Kinesis Data Streams, deals with data. So it (RS) 
+>
+And Kinesis Video Streams, which is designed to be used with video data. So it (RS)
+-
+
+
+>
+Here's an example of how you might use Kinesis data streams:
+On the left,we've got our data producers.
+these are all the devices that are producing the data.
+It could be applications running on EC2 instances,
+mobile devices,
+laptops,
+and IoT devices. (Or Internet of things - so connected devices like devices in factories or vehicles, anything connected to a network) 
+>>
+And all of these devices are producing data
+and sending it over to Kinesis Data Streams.
+>
+
+Now, Kinesis Streams retains the data
+by default for 24 hours,
+with a maximum of 365 days retention.
+And the data is stored in these things called shards.
+And a shard is basically a sequence of data records.
+Each data record has a unique sequence number,
+and a Kinesis stream is made up of 1 or more shards.
+
+So the data is stored in these shards,
+and retained for 24 hours by default.
+BUT once our data is in Kinesis,
+>
+if we want to do anything with it,
+>
+we'll need to introduce some data consumers.
+That could be EC2 instances
+or Lambda functions,
+which consume the data from Kinesis.
+So the consumers basically take the data from the shard
+and process it.
+
+For instance, they might be running some algorithm
+on stock prices,
+running sentiment analysis on a social media feed,
+or analyzing clickstream data
+to generate product recommendations.
+
+>After the data consumers
+have completed their calculations,
+they can then save the data to permanent storage.
+For example, to DynamoDB, S3,
+>>
+Elastic MapReduce, or Redshift for example.
+
+But the main thing to understand, is that Kinesis Data Streams
+is basically facilitating this whole architecture
+by making it easy to collect and stream the data,
+so that your application can then consume
+and process its as you wish.
+
+-
+>
+Now for the exam,
+the main thing I would like you
+to take away from this lesson is that (RS)
+> (RS)
+> And KDS is for streaming data. Whereas KVS is used for streaming video for instance, from connected video devices. 
+
+So that is the end of this lesson.
+And if you're ready to move on , I'll see you in the next lesson.
+Thank you.
+
+
+
+
+
+
+
+
+
+FIREHOSE NOTES: 
+>
+
+
+
+Hi and Welcome back to this lesson on Kinesis Data Firehose, also known as Kinesis Firehose. 
+
+
+Now Firehose allows you to capture, transform, and load data streams into AWS data stores enabling near real-time analytics using business intelligence tools.
+
+So this is all about capturing, transforming, and loading the data.
+
+-
+> Its (RS) and RS
+So it scales automatically. 
+
+> You get real-time processing , so it (RS)
+
+> You can transform, (RS) 
+Before loading into permanent storage
+
+> and it includes (RS)
+So if something goes wrong, it going to retry. 
+
+-
+
+Let's review an example:
+>
+Here 's our data producers.
+>
+>They're producing data that is being collected by Kinesis Firehose. 
+>Optionally, we can perform some transformation, using Lambda say for example to change the format of our data.
+
+>> No there is no data retention in firehose, so after processing, if we need to store the data permanently, we can load it into permanent storage. 
+
+For instance we can save it to S3, to RedShift, or Opensearch.  
+
+And with Kinesis Data Firehose, there are no shards, it doesn't retain the data, there's no consumers, and after the data is loaded into it's final destination, you can perform analytics using Business intelligence tools. 
+-
+>
+Use cases for Kinesis Data Firehose include:RS x4
+So loading streaming data into a data lake - And a data lake is simply a large scale data repository 
+
+-
+So for the exam, be sure to know that Kinesis Data Streams capture RS
+
+Whereas
+RS
+So this is all about transforming and then loading the data.
+
+
+
+
+GLUE
+----
+
+
+Hi and Welcome Back to this lesson which is going to introduce AWS Glue. 
+-
+> >
+Now Glue is (RS)
+> it (RS)
+> and performs (RS)
+-
+>
+The Data could be stored in S3,DynamoDB in RDS, RedShift, or could even be streamed data, injested in real time,  using Kinesis.
+>>
+AWS Glue is then Used to discover and categorize, and then transform for instance, clean, remove duplicates, §or enrich the data, and then load into another service like RDS, Athena, S3 or RedShift.
+ 
+And using a service like AWS Glue to extract transform and load your data, allows you to easily use your data for Analytics and Machine Learning.
+
+-
+Let's take a look at an example of using Glue to create  a centralised data catalog:
+> Imagine you have different types of data stored in a few different locations.
+
+> Well Glue can use a crawler to make sense of your data. 
+>And A crawler is A program that connects to a data store and classifies it to determine a schema for your data
+> > and then creates metadata tables in Data Catalog.
+( and metadata is simply data about data, so in this case, we might want to catalog they type of data)
+So You can use AWS Glue to manage the metadata in this central repository.  
+And You can then access the Data Catalog to support ETL and analytics.
+
+-
+> Another example, is Joining Data for data warehouse: 
+> imagine You have clickstream data in RDS and customer data stored in S3. 
+>
+You can use AWS Glue to join and enrich your data and then load the results into Redshift so that it can be queried by you applications.
+ So it's performing extract and transform before loading the data into its final destination where it can be used for analytics. 
+
+-
+>
+For the exam, be aware that AWS Glue is used to RS.
+
+> It crawls your data, and creates the data catalog, which contains your metadata for instance the type or format of your data. 
+
+>After the data catalog is created, 
+It can Extract data from various sources.
+
+>Transform it, for instance (RS)
+
+>And load it into other aws services like. For use by analytics applications and machine learning applications. 
+
+Well that's all for this lesson, and if you'd like to continue, please join me in the next one TY. 
+-----
+EMR
+
+Hi and welcome back to this lesson on Elastic Map Reduce - also known as EMR. 
+-
+>Now EMR is A Big Data platform. 
+You may have heard of Big Data before, it's usually petabytes of data.
+> That requires (RS)
+> and it's used for (RS)
+-
+>
+Elastic Map Reduce supports multiple different types of data. 
+For instance RS like 
+>RS like RS
+>And RS like RS
+-
+>
+Example use cases include 
+
+> Processing genomic data, using statistical algorithms and predictive models to discover hidden patterns, and find correlations.
+
+>
+Analysing click-stream data to understand customer preferences or market trends.
+
+> or 
+
+To Perform log processing on log data generated by your applications.
+
+-
+>
+It can Extract data from a variety of sources,> like S3,> DynamoDB,> Redshift, 
+>And it can Analyze events from streaming data sources in real-time, using Kinesis
+
+> It also supports popular Open source frameworks like: Apache Spark, Apache Hive, Presto, Hadoop.
+(And that means you can build and Run applications using these frameworks and they will be able to interact with Elastic Map Reduce) 
+
+-
+>
+And the great thing about using EMR is that it is essentially a fully managed Big Data solution. And AWS does all the heavy lifting for you.
+
+>
+So that means theres no need to worry about (RS)
+>Or RS
+> you don't need to worry about (RS)
+> and its (RS)
+AWS claim, that not only is it faster than an on premises solution it also costs less than 50%.compared to installing and managing your own Big Data platform. 
+-
+>
+So for the exam - know that EMR is A (RS)
+>It supports petabyte scale (RS)
+> and use cases include (RS)
+
+Well that's all for this lesson and if you'd like to move on, I'll see you in the next one TY. 
+
+-----
+OpenSearch
+
+Hi and Welcome back to this lesson on Amazon OpenSearch.
+
+-
+Before we dive in, let's review what is ElasticSearch ?
+> You may have heard about ElasticSearch before, because it is a very widely used (RS) 
+> You can use it to (RS)
+> Another common use case is to search (RS)
+
+-
+Now Amazon OpenSearch, is A fully managed ElasticSearch service. 
+>>
+And the reason it exists, is because (RS)
+
+> > > So that's where the Amazon OPensearch service comes in to make getting up and running with Elasticsearch, a whole lot easier!
+
+-
+>
+The great thing about it is that RS
+> Including the RS
+>RS
+>AND RS
+-
+
+> it's Compatible with all the standard ElasticSearch open source APIs
+
+> It Integrates with data ingestion tools like Logstash (for data collection and processing) 
+> and visualisation  tools like Kibana (for search and data visualisation, allowing you to create bar charts, line graphs and scatter plots etc ) 
+
+>It also Integrates with AWS services like CloudWatch for Monitoring, 
+
+> and You cans also use CloudWatch Logs >and Kinesis Firehose, for data ingestion. 
+
+>And you can Use Lambda functions respond to new data in > S3 and >DynamoDB, by processing it and streaming it to OpenSearch.
+
+-
+>
+So for the exam remember that Amazon openserach is (RS) 
+
+> it is RS
+Logstash (for data collection and processing)
+And Kibana for search and data visualisation
+
+>You can RS
+
+>And use cases include RS
+
+Well that's all for this lesson and if you're ready to move on, please join me in the next on TY
+
+
+  
+
