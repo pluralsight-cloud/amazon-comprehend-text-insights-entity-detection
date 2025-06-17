@@ -1,4 +1,9 @@
-Kinesis is a family of services
+Hi, and welcome back to this lesson on Kinesis. 
+-
+
+So, what is Kinesis?
+>
+Well, it's a family of services
 that enables you to collect, process,
 and analyze streaming data in real time.
 
