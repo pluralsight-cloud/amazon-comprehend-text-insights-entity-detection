@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Resources for AWS Comprehend Topic Modeling with Automated GitHub Sample Data Fetching'
+
+Resources:
+  # S3 bucket for input and output data
+  TopicModelingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'comprehend-topic-modeling-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM role for Comprehend to access S3
+  ComprehendServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ComprehendTopicModelingRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: comprehend.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Path: /
+      Policies:
+        - PolicyName: ComprehendTopicModelingPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:PutObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::${TopicModelingBucket}'
+                  - !Sub 'arn:aws:s3:::${TopicModelingBucket}/*'
+              # Explicit permissions for the output folder
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListObjects
+                Resource:
+                  - !Sub 'arn:aws:s3:::${TopicModelingBucket}/output/*'
+
+  # S3 bucket policy to allow Comprehend access
+  TopicModelingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref TopicModelingBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt ComprehendServiceRole.Arn
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:PutObject
+            Resource:
+              - !Sub 'arn:aws:s3:::${TopicModelingBucket}'
+              - !Sub 'arn:aws:s3:::${TopicModelingBucket}/*'
+
+  # Lambda function to create S3 folders and fetch GitHub repo
+  GitHubToS3Function:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt GitHubToS3Role.Arn
+      Runtime: python3.9
+      Timeout: 300  # 5 minutes
+      MemorySize: 512  # More memory for processing files
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import os
+          import tempfile
+          import urllib.request
+          import zipfile
+          import shutil
+          import logging
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def handler(event, context):
+              logger.info('Received event: %s', event)
+              response_data = {}
+              
+              try:
+                  request_type = event['RequestType']
+                  properties = event['ResourceProperties']
+                  bucket_name = properties['BucketName']
+                  github_repo = properties['GitHubRepo']
+                  github_branch = properties.get('GitHubBranch', 'main')
+                  target_folder = properties.get('TargetFolder', 'input')
+                  sample_data_path = properties.get('SampleDataPath', '')
+                  
+                  if request_type == 'Create' or request_type == 'Update':
+                      # Create S3 client
+                      s3 = boto3.client('s3')
+                      
+                      # Create input folder
+                      logger.info(f"Creating input folder in bucket {bucket_name}")
+                      s3.put_object(
+                          Bucket=bucket_name,
+                          Key='input/',
+                          Body=''
+                      )
+                      
+                      # Create output folder
+                      logger.info(f"Creating output folder in bucket {bucket_name}")
+                      s3.put_object(
+                          Bucket=bucket_name,
+                          Key='output/',
+                          Body=''
+                      )
+                      
+                      # Create temp directory for GitHub repo
+                      with tempfile.TemporaryDirectory() as tmpdirname:
+                          # Download the repository as a zip file
+                          zip_url = f"{github_repo}/archive/refs/heads/{github_branch}.zip"
+                          zip_path = os.path.join(tmpdirname, "repo.zip")
+                          logger.info(f"Downloading from {zip_url}")
+                          urllib.request.urlretrieve(zip_url, zip_path)
+                          
+                          # Extract the zip file
+                          extract_dir = os.path.join(tmpdirname, "extracted")
+                          os.makedirs(extract_dir, exist_ok=True)
+                          logger.info(f"Extracting zip file to {extract_dir}")
+                          with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                              zip_ref.extractall(extract_dir)
+                          
+                          # Find the repository directory (it includes the branch name)
+                          repo_dir = None
+                          for item in os.listdir(extract_dir):
+                              if os.path.isdir(os.path.join(extract_dir, item)):
+                                  repo_dir = os.path.join(extract_dir, item)
+                                  break
+                          
+                          if not repo_dir:
+                              raise Exception("Could not find repository directory")
+                          
+                          # Navigate to the sample data directory if specified
+                          if sample_data_path:
+                              source_dir = os.path.join(repo_dir, sample_data_path)
+                          else:
+                              source_dir = repo_dir
+                          
+                          logger.info(f"Source directory: {source_dir}")
+                          
+                          # Upload files to S3
+                          file_count = 0
+                          
+                          for root, dirs, files in os.walk(source_dir):
+                              for file in files:
+                                  local_path = os.path.join(root, file)
+                                  # Calculate relative path from source_dir
+                                  relative_path = os.path.relpath(local_path, source_dir)
+                                  s3_key = f"{target_folder}/{relative_path}"
+                                  
+                                  logger.info(f"Uploading {local_path} to s3://{bucket_name}/{s3_key}")
+                                  s3.upload_file(local_path, bucket_name, s3_key)
+                                  file_count += 1
+                          
+                          response_data['Message'] = f"Successfully created folders and uploaded {file_count} files to S3"
+                  
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+              
+              except Exception as e:
+                  logger.error('Error: %s', str(e))
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+  # IAM role for the Lambda function
+  GitHubToS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: GitHubToS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${TopicModelingBucket}'
+                  - !Sub 'arn:aws:s3:::${TopicModelingBucket}/*'
+
+  # Custom resource to trigger the Lambda function
+  FetchGitHubToS3:
+    Type: Custom::GitHubToS3
+    DependsOn: TopicModelingBucket
+    Properties:
+      ServiceToken: !GetAtt GitHubToS3Function.Arn
+      BucketName: !Ref TopicModelingBucket
+      GitHubRepo: 'https://github.com/pluralsight-cloud/amazon-comprehend-text-insights-entity-detection'
+      GitHubBranch: 'main'
+      SampleDataPath: 'Module_01/Demo_Topic_Modeling/sample_data'
+      TargetFolder: 'input'
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref TopicModelingBucket
+    Export:
+      Name: TopicModelingBucketName
+
+  BucketArn:
+    Description: ARN of the S3 bucket
+    Value: !GetAtt TopicModelingBucket.Arn
+    Export:
+      Name: TopicModelingBucketArn
+
+  ComprehendRoleArn:
+    Description: ARN of the IAM role for Comprehend
+    Value: !GetAtt ComprehendServiceRole.Arn
+    Export:
+      Name: ComprehendServiceRoleArn
