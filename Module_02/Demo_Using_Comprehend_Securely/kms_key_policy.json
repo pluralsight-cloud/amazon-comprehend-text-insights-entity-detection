@@ -27,7 +27,7 @@
       "Condition": {
         "StringEquals": {
           "kms:CallerAccount": "YOUR_ACCOUNT_ID",
-          "kms:ViaService": "comprehend.REGION.amazonaws.com"
+          "kms:ViaService": "comprehend.us-east-1.amazonaws.com"
         }
       }
     },
