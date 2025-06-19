@@ -67,7 +67,7 @@ def run_async_classification_job(comprehend_client, bucket_name, role_arn):
     
     print(f"\nStarting asynchronous classification job: {job_name}")
     
-    # For demo purposes, we'll use the built-in sentiment classifier
+    # start_sentiment_detection_job is the API call that initiates an asynchronous sentiment analysis job
     response = comprehend_client.start_sentiment_detection_job(
         InputDataConfig={
             'S3Uri': f"s3://{bucket_name}/input/",
