@@ -85,11 +85,7 @@ def run_async_classification_job(comprehend_client, bucket_name, role_arn):
     print(f"Classification job started with ID: {job_id}")
     
     # Wait for job to complete
-    if wait_for_job_completion(comprehend_client, job_id):
-        print(f"Results available at: s3://{bucket_name}/output/{job_id}/output/")
-        print("\nTo view the results, you can run:")
-        print(f"aws s3 cp s3://{bucket_name}/output/{job_id}/output/ ./results/ --recursive")
-        print("And then examine the output files.")
+    wait_for_job_completion(comprehend_client, job_id)
     
     return job_id
 
