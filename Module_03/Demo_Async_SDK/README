@@ -1,9 +1,25 @@
 Files needed to complete the Demo: Long-running and Asynchronous Jobs
 
-Commands: 
-1. Using the AWS Cloudshell, deploy CloudFormation stack:
+Run the following commands in the AWS CloudShell (replacing <BUCKET_NAME> with the name of your S3 bucket created by the CloudFormation stack):
 
-aws cloudformation deploy --template-file comprehend-async-classification.yaml --stack-name comprehend-async-classification --capabilities CAPABILITY_NAMED_IAM
+git clone https://github.com/pluralsight-cloud/amazon-comprehend-text-insights-entity-detection.git
+
+cd amazon-comprehend-text-insights-entity-detection/Module_03/Demo_Async_SDK
+
+aws cloudformation deploy \
+  --template-file comprehend-async-classification.yaml \
+  --stack-name comprehend-async-classification \
+  --capabilities CAPABILITY_NAMED_IAM
+
+aws cloudformation describe-stacks --stack-name comprehend-async-classification
+
+aws s3api put-object --bucket <BUCKET_NAME> --key input/
+
+aws s3 cp sample_documents.txt s3://<BUCKET_NAME>/input/
+
+chmod u+x comprehend_async_classification.py
+
+python comprehend_async_classification.py
 
 2. Create input folder in S3 bucket, and upload sample_documents.txt
 
