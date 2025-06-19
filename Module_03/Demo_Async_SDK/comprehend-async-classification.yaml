@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Resources for Amazon Comprehend Asynchronous Classification Demo'
+
+Resources:
+  # S3 Bucket for storing input and output data
+  ComprehendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'comprehend-async-classification-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM Role for Comprehend to access S3
+  ComprehendServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: comprehend.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+      Policies:
+        - PolicyName: ComprehendS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ComprehendBucket}'
+                  - !Sub 'arn:aws:s3:::${ComprehendBucket}/*'
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ComprehendBucket}/output/*'
+
+Outputs:
+  BucketName:
+    Description: 'Name of the S3 bucket for Comprehend data'
+    Value: !Ref ComprehendBucket
+    Export:
+      Name: ComprehendAsyncBucketName
+
+  ComprehendServiceRoleArn:
+    Description: 'ARN of the IAM role for Comprehend'
+    Value: !GetAtt ComprehendServiceRole.Arn
+    Export:
+      Name: ComprehendServiceRoleArn
