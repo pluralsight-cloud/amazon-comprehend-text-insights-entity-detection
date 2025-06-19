@@ -5,7 +5,7 @@ Run the following commands in the AWS CloudShell (replacing <BUCKET_NAME> with t
 1) Clone repo
 git clone https://github.com/pluralsight-cloud/amazon-comprehend-text-insights-entity-detection.git
 
-2) Change to correct directory in the cloed repo
+2) Change to correct directory in the cloned repo
 cd amazon-comprehend-text-insights-entity-detection/Module_03/Demo_Async_SDK
 
 3) Create the CloudFormation stack
