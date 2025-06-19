@@ -1,5 +1,6 @@
 Files needed for Demo: Invoking Amazon Comprehend Using the AWS SDK.
 Use the script as follows:
 
+wget https://raw.githubusercontent.com/pluralsight-cloud/amazon-comprehend-text-insights-entity-detection/refs/heads/main/Module_03/Demo_SDK/comprehend_demo.py
 chmod +x comprehend_demo.py
 python comprehend_demo.py
