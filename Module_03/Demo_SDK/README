@@ -1,0 +1,5 @@
+Files needed for Demo: Invoking Amazon Comprehend Using the AWS SDK.
+Use the script as follows:
+
+chmod +x comprehend_demo.py
+python comprehend_demo.py
