@@ -1,0 +1,16 @@
+Files needed to complete the Demo: Long-running and Asynchronous Jobs
+
+Commands: 
+1. Using the AWS Cloudshell, deploy CloudFormation stack:
+
+aws cloudformation deploy --template-file comprehend-async-classification.yaml --stack-name comprehend-async-classification --capabilities CAPABILITY_NAMED_IAM
+
+2. Create input folder in S3 bucket, and upload sample_documents.txt
+
+3. Add executable permissions on the Python script
+
+chmod u+x comprehend_async_classification.py
+
+4. Run the script:
+
+python comprehend_async_classification.py
