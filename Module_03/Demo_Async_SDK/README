@@ -17,10 +17,10 @@ aws cloudformation deploy \
 4) Identify the bucket name
 aws cloudformation describe-stacks --stack-name comprehend-async-classification
 
-5) Create the input folder
+5) Create the input folder (replacing <BUCKET_NAME> with the name of your S3 bucket from the output of step 4)
 aws s3api put-object --bucket <BUCKET_NAME> --key input/
 
-6) Upload the sample data
+6) Upload the sample data (replacing <BUCKET_NAME> with the name of your S3 bucket from the output of step 4)
 aws s3 cp sample_documents.txt s3://<BUCKET_NAME>/input/
 
 7) Change permissions on the Python script
